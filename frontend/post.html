@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post - The Green Earth Post</title>
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/the-green-earth-post-xtra-blog.css" rel="stylesheet">
+</head>
+<body>
+    <header class="tm-header" id="tm-header">
+        <div class="tm-header-wrapper">
+            <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="tm-site-header">
+                <div class="mb-3 mx-auto tm-site-logo"><i class="fas fa-seedling fa-2x"></i></div>
+                <h1 class="text-center">The Green Earth Post</h1>
+            </div>
+            <nav class="tm-nav" id="tm-nav">            
+                <ul>
+                    <li class="tm-nav-item"><a href="index.html" class="tm-nav-link">
+                        <i class="fas fa-home"></i>
+                        Eco Home
+                    </a></li>
+                    <li class="tm-nav-item"><a href="create-post.html" class="tm-nav-link">
+                        <i class="fas fa-plus-circle"></i>
+                        New Post
+                    </a></li>
+                    <li class="tm-nav-item"><a href="about.html" class="tm-nav-link">
+                        <i class="fas fa-hand-holding-heart"></i>
+                        Our Green Mission
+                    </a></li>
+                </ul>
+            </nav>
+            <div class="tm-mb-65">
+                <a href="https://facebook.com/greenearth" class="tm-social-link">
+                    <i class="fab fa-facebook tm-social-icon"></i>
+                </a>
+                <a href="https://twitter.com/greenearthpost" class="tm-social-link">
+                    <i class="fab fa-twitter tm-social-icon"></i>
+                </a>
+                <a href="https://instagram.com/greenearthpost" class="tm-social-link">
+                    <i class="fab fa-instagram tm-social-icon"></i>
+                </a>
+                <a href="https://linkedin.com/company/greenearthpost" class="tm-social-link">
+                    <i class="fab fa-linkedin tm-social-icon"></i>
+                </a>
+            </div>
+            <p class="tm-mb-80 pr-5 text-white">
+                Championing planetary health through innovative eco-technologies and earth-conscious journalism
+            </p>
+        </div>
+    </header>
+    <div class="container-fluid">
+        <main class="tm-main">         
+            <div class="row tm-row">
+                <div class="col-lg-8 tm-post-col">
+                    <div class="tm-post-full" id="post-content"></div>
+                </div>
+                <aside class="col-lg-4 tm-aside-col">
+                    <div class="tm-post-sidebar">
+                        <hr class="mb-3 tm-hr-primary">
+                        <h2 class="mb-4 tm-post-title tm-color-primary">Earth Topics</h2>
+                        <ul class="tm-mb-75 pl-5 tm-category-list">
+                            <li><a href="#" class="tm-color-primary">Regenerative Farming</a></li>
+                            <li><a href="#" class="tm-color-primary">Climate Solutions</a></li>
+                            <li><a href="#" class="tm-color-primary">Biodiversity Conservation</a></li>
+                            <li><a href="#" class="tm-color-primary">Circular Economy</a></li>
+                            <li><a href="#" class="tm-color-primary">Renewable Energy</a></li>
+                            <li><a href="#" class="tm-color-primary">Eco-Technology</a></li>
+                        </ul>
+                    </div>                    
+                </aside>
+            </div>
+            <footer class="row tm-row">
+                <div class="col-md-6 col-12 tm-color-gray tm-copyright">
+                    Copyright 2024 The Green Earth Post
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="js/jquery.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        const apiServerUrl = 'http://13.37.105.7:5000';
+        const postId = new URLSearchParams(window.location.search).get('post_id');
+        
+        if (!postId) window.location.href = 'index.html';
+        
+        axios.get(`${apiServerUrl}/api/post/${postId}`)
+            .then(response => {
+                const post = response.data;
+                const date = new Date(post.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                document.getElementById('post-content').innerHTML = `
+                    <div class="mb-4">
+                        <h2 class="pt-2 tm-color-primary tm-post-title">${post.title}</h2>
+                        <p class="tm-mb-40">${date} posted by ${post.author || 'Anonymous'}</p>
+                        ${post.image_url ? `<img src="${post.image_url}" alt="Post image" class="img-fluid mb-4">` : ''}
+                        <div class="post-content">
+                            ${post.content.replace(/\n/g, '<br>')}
+                        </div>
+                        <div class="d-flex justify-content-between tm-pt-45">
+                            <span class="tm-color-primary">${post.category}</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <span id="comment-count">0 comments</span>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="tm-color-primary tm-post-title">Community Dialogue</h2>
+                        <hr class="tm-hr-primary tm-mb-45">
+                        <div id="comments-container"></div>
+                        <form id="comment-form" class="mb-5">
+                            <h2 class="tm-color-primary tm-post-title mb-4">Share Your Eco-Insights</h2>
+                            <div class="mb-4">
+                                <input class="form-control" id="comment-name" name="name" placeholder="Your name" type="text" required>
+                            </div>
+                            <div class="mb-4">
+                                <textarea class="form-control" id="comment-message" name="message" placeholder="Your ecological perspective" rows="6" required></textarea>
+                            </div>
+                            <div class="text-right">
+                                <button type="submit" class="tm-btn tm-btn-primary tm-btn-small">Plant Your Thought</button>
+                            </div>
+                            <div class="mb-4" id="comment-status"></div>
+                        </form>                          
+                    </div>`;
+                
+                loadComments();
+                
+                document.getElementById('comment-form').addEventListener('submit', e => {
+                    e.preventDefault();
+                    const commentData = {
+                        post_id: postId,
+                        name: document.getElementById('comment-name').value,
+                        comment: document.getElementById('comment-message').value
+                    };
+                    
+                    axios.post(`${apiServerUrl}/api/comment`, commentData)
+                        .then(() => {
+                            document.getElementById('comment-status').innerHTML = 
+                                '<div class="alert alert-success">Comment posted successfully!</div>';
+                            document.getElementById('comment-form').reset();
+                            loadComments();
+                        })
+                        .catch(error => {
+                            document.getElementById('comment-status').innerHTML = 
+                                `<div class="alert alert-danger">Error: ${error.response?.data?.error || 'Failed to post comment'}</div>`;
+                        });
+                });
+            })
+            .catch(() => window.location.href = 'index.html');
+        
+        function loadComments() {
+            axios.get(`${apiServerUrl}/api/comments/${postId}`)
+                .then(response => {
+                    const comments = response.data;
+                    let commentsHtml = '';
+                    
+                    if (comments.length === 0) {
+                        commentsHtml = '<p>No comments yet. Be the first to comment!</p>';
+                    } else {
+                        comments.forEach(comment => {
+                            const date = new Date(comment.date).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                            });
+                            
+                            commentsHtml += `
+                                <div class="tm-comment tm-mb-45">
+                                    <figure class="tm-comment-figure">
+                                        <img src="img/comment.png" alt="Image" class="mb-2 rounded-circle img-thumbnail">
+                                        <figcaption class="tm-color-primary text-center">${comment.name}</figcaption>
+                                    </figure>
+                                    <div>
+                                        <p>${comment.comment}</p>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="tm-color-primary">${date}</span>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        });
+                    }
+                    
+                    document.getElementById('comments-container').innerHTML = commentsHtml;
+                    document.getElementById('comment-count').textContent = 
+                        `${comments.length} comment${comments.length === 1 ? '' : 's'}`;
+                });
+        }
+    </script>
+</body>
+</html>
