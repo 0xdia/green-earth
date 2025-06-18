@@ -1,21 +1,22 @@
 import os
-import mysql.connector
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import boto3
 
-def get_mysql_host():
+def get_postgres_host():
     client = boto3.client('rds')
-    return client.describe_db_instances(DBInstanceIdentifier=os.environ["MYSQL_DB_INSTANCE"])['DBInstances'][0]['Endpoint']['Address']
+    return client.describe_db_instances(DBInstanceIdentifier=os.environ["POSTGRES_DB_INSTANCE"])['DBInstances'][0]['Endpoint']['Address']
 
 class DBHandler:
     __connection = None
 
     def set_connection(self):
         if not self.__connection:
-            self.__connection = mysql.connector.connect(
-                host=get_mysql_host(),
-                database=os.environ["MYSQL_DATABASE"],
-                user=os.environ["MYSQL_USER"],
-                password=os.environ["MYSQL_PASSWORD"]
+            self.__connection = psycopg2.connect(
+                host=get_postgres_host(),
+                database=os.environ["POSTGRES_DATABASE"],
+                user=os.environ["POSTGRES_USER"],
+                password=os.environ["POSTGRES_PASSWORD"]
             )
             self.__create_tables()
             self.populate_database(num_posts=5, comments_per_post=3)
@@ -24,22 +25,22 @@ class DBHandler:
         cursor = self.__connection.cursor()
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS posts (
-                id INT PRIMARY KEY AUTO_INCREMENT,
+                id SERIAL PRIMARY KEY,
                 title VARCHAR(255) NOT NULL,
                 content TEXT NOT NULL,
                 author VARCHAR(100),
-                date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 category VARCHAR(50),
                 image_url VARCHAR(255)
             )
         """)
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS comments (
-                id INT PRIMARY KEY AUTO_INCREMENT,
-                post_id INT NOT NULL,
+                id SERIAL PRIMARY KEY,
+                post_id INTEGER NOT NULL,
                 name VARCHAR(100),
                 comment TEXT NOT NULL,
-                date DATETIME DEFAULT CURRENT_TIMESTAMP,
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
             )
         """)
@@ -49,21 +50,22 @@ class DBHandler:
         self.set_connection()
         cursor = self.__connection.cursor()
         cursor.execute(
-            "INSERT INTO posts (title, content, author, category, image_url) VALUES (%s, %s, %s, %s, %s)",
+            "INSERT INTO posts (title, content, author, category, image_url) VALUES (%s, %s, %s, %s, %s) RETURNING id",
             (title, content, author, category, image_url)
         )
+        post_id = cursor.fetchone()[0]
         self.__connection.commit()
-        return cursor.lastrowid
+        return post_id
 
     def get_posts(self, limit=10, offset=0):
         self.set_connection()
-        cursor = self.__connection.cursor(dictionary=True)
+        cursor = self.__connection.cursor(cursor_factory=RealDictCursor)
         cursor.execute("SELECT * FROM posts ORDER BY date DESC LIMIT %s OFFSET %s", (limit, offset))
         return cursor.fetchall()
 
     def get_post(self, post_id):
         self.set_connection()
-        cursor = self.__connection.cursor(dictionary=True)
+        cursor = self.__connection.cursor(cursor_factory=RealDictCursor)
         cursor.execute("SELECT * FROM posts WHERE id = %s", (post_id,))
         return cursor.fetchone()
 
@@ -78,7 +80,7 @@ class DBHandler:
 
     def get_comments(self, post_id):
         self.set_connection()
-        cursor = self.__connection.cursor(dictionary=True)
+        cursor = self.__connection.cursor(cursor_factory=RealDictCursor)
         cursor.execute("SELECT * FROM comments WHERE post_id = %s ORDER BY date ASC", (post_id,))
         return cursor.fetchall()
 
