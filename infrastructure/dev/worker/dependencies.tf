@@ -3,7 +3,7 @@ data "terraform_remote_state" "ground_state" {
   config = {
     resource_group_name  = "TerraformRG"
     storage_account_name = "tfstracc"
-    container_name       = "drupal-terraform-state"
+    container_name       = "green-earth-terraform-state"
     key                  = "terraform-ground.tfstate"
   }
 }
@@ -13,7 +13,7 @@ data "terraform_remote_state" "database_state" {
   config = {
     resource_group_name  = "TerraformRG"
     storage_account_name = "tfstracc"
-    container_name       = "drupal-terraform-state"
+    container_name       = "green-earth-terraform-state"
     key                  = "terraform-database.tfstate"
   }
 }
