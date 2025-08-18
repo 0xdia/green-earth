@@ -41,14 +41,14 @@ def log_api_call(response):
     )
     return response
 
-@app.route('/api/health')
+@app.route('/health')
 def health():
     return jsonify({
         "status": "healthy",
         "service": "Green Earth Backend",
     }), 200
 
-@app.route('/api/posts', methods=['GET'])
+@app.route('/posts', methods=['GET'])
 def get_posts():
     try:
         limit = request.args.get('limit', default=10, type=int)
@@ -58,7 +58,7 @@ def get_posts():
         logger.error(f"Error fetching posts: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
-@app.route('/api/post/<int:post_id>', methods=['GET'])
+@app.route('/post/<int:post_id>', methods=['GET'])
 def get_post(post_id):
     try:
         post = db.get_post(post_id)
@@ -67,7 +67,7 @@ def get_post(post_id):
         logger.error(f"Error fetching post {post_id}: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
-@app.route('/api/post', methods=['POST'])
+@app.route('/post', methods=['POST'])
 def create_post():
     try:
         data = request.json
@@ -89,7 +89,7 @@ def create_post():
         logger.error(f"Create post failed: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
-@app.route('/api/comments/<int:post_id>', methods=['GET'])
+@app.route('/comments/<int:post_id>', methods=['GET'])
 def get_comments(post_id):
     try:
         return jsonify(db.get_comments(post_id))
@@ -97,7 +97,7 @@ def get_comments(post_id):
         logger.error(f"Error fetching comments for post {post_id}: {str(e)}")
         return jsonify({"error": "Internal server error"}), 500
 
-@app.route('/api/comment', methods=['POST'])
+@app.route('/comment', methods=['POST'])
 def create_comment():
     try:
         data = request.json
