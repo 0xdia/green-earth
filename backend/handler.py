@@ -43,24 +43,10 @@ def log_api_call(response):
 
 @app.route('/api/health')
 def health():
-    try:
-        # Check if 'showLocalIp' parameter is requested
-        if request.args.get('showLocalIp') == 'yes':
-            try:
-                # Get local IP only when requested
-                local_ip = socket.gethostbyname(socket.gethostname())
-                return f'API Server is healthy! Local IP: {local_ip}', 200
-            except Exception as ip_error:
-                logger.error(f"IP fetch failed: {str(ip_error)}")
-                # Return 200 even if IP fetch fails - server is still healthy
-                return 'API Server is healthy! (IP unavailable)', 200
-        else:
-            # Standard response without IP
-            return 'API Server is healthy!', 200
-            
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        return jsonify({"error": "Internal server error"}), 500
+    return jsonify({
+        "status": "healthy",
+        "service": "Green Earth Backend",
+    }), 200
 
 @app.route('/api/posts', methods=['GET'])
 def get_posts():
