@@ -8,16 +8,9 @@ Green-Earth is a **smart static website** project built with a simple and reliab
 
 ---
 
-## Getting Started
-
-### Prerequisites
-- Python 3.x  
-- Terraform  
-- AWS CLI (configured)
-
 ### Architecture
 
-![Architecture Diagram](documentation/diagram.svg)
+![Architecture Diagram](documentation/aws_architecture.svg)
 
 ### Solution Components
 - **Network Layer**
