@@ -4,8 +4,7 @@ from psycopg2.extras import RealDictCursor
 import boto3
 
 def get_postgres_host():
-    client = boto3.client('rds')
-    return client.describe_db_instances(DBInstanceIdentifier=os.environ["POSTGRES_DB_INSTANCE"])['DBInstances'][0]['Endpoint']['Address']
+    return os.environ["POSTGRES_HOST"]
 
 class DBHandler:
     __connection = None
@@ -13,7 +12,7 @@ class DBHandler:
     def set_connection(self):
         if not self.__connection:
             self.__connection = psycopg2.connect(
-                host=get_postgres_host(),
+                host=os.environ["POSTGRES_HOST"],
                 database=os.environ["POSTGRES_DATABASE"],
                 user=os.environ["POSTGRES_USER"],
                 password=os.environ["POSTGRES_PASSWORD"]
