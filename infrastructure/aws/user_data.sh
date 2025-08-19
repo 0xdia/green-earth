@@ -43,38 +43,19 @@ sudo tee /etc/nginx/conf.d/frontend.conf << 'EOF'
 server {
     listen 80;
 
-    # Serve frontend (static files)
-    root /home/ec2-user/green-earth/frontend;
+    root /usr/share/nginx/html;
     index index.html;
 
     location / {
-        try_files $uri /index.html;
+        try_files $uri $uri/ /index.html;
     }
 
-    # Proxy backend API calls (no /api prefix)
-    location /posts {
-        proxy_pass http://127.0.0.1:5000;
-        include proxy_params;
-    }
-
-    location /post {
-        proxy_pass http://127.0.0.1:5000;
-        include proxy_params;
-    }
-
-    location /comments {
-        proxy_pass http://127.0.0.1:5000;
-        include proxy_params;
-    }
-
-    location /comment {
-        proxy_pass http://127.0.0.1:5000;
-        include proxy_params;
-    }
-
-    location /health {
-        proxy_pass http://127.0.0.1:5000;
-        include proxy_params;
+    # Proxy all backend routes
+    location ~ ^/(posts|post|comments|comment|health) {
+        proxy_pass http://0.0.0.0:5000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
 }
 EOF

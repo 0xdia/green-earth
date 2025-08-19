@@ -1,4 +1,3 @@
-/* # SNS Topic for alerts
 resource "aws_sns_topic" "alerts" {
   name = "${var.project_name}-alerts"
 
@@ -8,7 +7,6 @@ resource "aws_sns_topic" "alerts" {
   }
 }
 
-# SNS Topic Policy
 resource "aws_sns_topic_policy" "alerts" {
   arn = aws_sns_topic.alerts.arn
 
@@ -38,7 +36,6 @@ resource "aws_sns_topic_policy" "alerts" {
   })
 }
 
-# CloudWatch Dashboard
 resource "aws_cloudwatch_dashboard" "main" {
   dashboard_name = "${var.project_name}-dashboard"
 
@@ -92,6 +89,7 @@ resource "aws_cloudwatch_dashboard" "main" {
 
 # CloudWatch Alarm for ALB 5XX errors
 resource "aws_cloudwatch_metric_alarm" "alb_5xx_errors" {
+  alarm_description   = "This metric monitors ALB 5XX errors"
   alarm_name          = "${var.project_name}-alb-5xx-errors"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = "2"
@@ -100,7 +98,6 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx_errors" {
   period              = "300"
   statistic           = "Sum"
   threshold           = "10"
-  alarm_description   = "This metric monitors ALB 5XX errors"
 
   dimensions = {
     LoadBalancer = aws_lb.main.arn_suffix
@@ -148,4 +145,3 @@ resource "aws_cloudwatch_metric_alarm" "alb_response_time" {
     Environment = var.environment
   }
 }
-*/

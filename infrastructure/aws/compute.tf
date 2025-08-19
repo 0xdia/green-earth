@@ -43,9 +43,9 @@ resource "aws_lb" "main" {
 
 resource "aws_lb_target_group" "web" {
   name     = "${var.project_name}-tg"
+  vpc_id   = aws_vpc.main.id
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.main.id
 
   health_check {
     enabled             = true
@@ -55,8 +55,8 @@ resource "aws_lb_target_group" "web" {
     path                = "/health"
     port                = 5000
     protocol            = "HTTP"
-    timeout             = 5
-    unhealthy_threshold = 2
+    timeout             = 25
+    unhealthy_threshold = 5
   }
 
   tags = {
@@ -81,7 +81,7 @@ resource "aws_autoscaling_group" "web" {
   vpc_zone_identifier       = aws_subnet.private[*].id
   target_group_arns         = [aws_lb_target_group.web.arn]
   health_check_type         = "ELB"
-  health_check_grace_period = 300
+  health_check_grace_period = 600
 
   min_size         = var.min_size
   max_size         = var.max_size

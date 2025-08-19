@@ -1,4 +1,4 @@
-/* resource "aws_db_subnet_group" "main" {
+resource "aws_db_subnet_group" "main" {
   name       = "${var.project_name}-db-subnet-group"
   subnet_ids = aws_subnet.private[*].id
 
@@ -11,8 +11,9 @@
 resource "aws_db_instance" "main" {
   identifier = "${var.project_name}-db"
 
-  engine         = "mysql"
-  engine_version = "8.0"
+  # Changed to PostgreSQL
+  engine         = "postgres"
+  engine_version = "15.4"
   instance_class = var.db_instance_class
 
   allocated_storage     = 20
@@ -31,19 +32,20 @@ resource "aws_db_instance" "main" {
   backup_window           = "03:00-04:00"
   maintenance_window      = "Sun:04:00-Sun:05:00"
 
-  # Multi-AZ for high availability
-  multi_az = true
+  multi_az               = true
+  skip_final_snapshot    = false
+  # Removed timestamp to prevent recreation
+  final_snapshot_identifier = "${var.project_name}-db-final-snapshot"
 
-  # Enable automated backups
-  skip_final_snapshot       = false
-  final_snapshot_identifier = "${var.project_name}-db-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
-
-  # Enable monitoring
   monitoring_interval = 60
   monitoring_role_arn = aws_iam_role.rds_monitoring.arn
-
-  # Enable performance insights (ISSUE)
   performance_insights_enabled = false
+
+  # Optional: Enable PostgreSQL logs
+  enabled_cloudwatch_logs_exports = ["postgresql"]
+
+  # PostgreSQL parameters
+  parameter_group_name = aws_db_parameter_group.postgres.name
 
   tags = {
     Name        = "${var.project_name}-db"
@@ -51,7 +53,21 @@ resource "aws_db_instance" "main" {
   }
 }
 
-# IAM Role for RDS Enhanced Monitoring
+resource "aws_db_parameter_group" "postgres" {
+  name   = "${var.project_name}-postgres15"
+  family = "postgres15"
+
+  parameter {
+    name  = "log_statement"
+    value = "all"
+  }
+
+  tags = {
+    Name        = "${var.project_name}-postgres-params"
+    Environment = var.environment
+  }
+}
+
 resource "aws_iam_role" "rds_monitoring" {
   name = "${var.project_name}-rds-monitoring-role"
 
@@ -74,13 +90,12 @@ resource "aws_iam_role" "rds_monitoring" {
   }
 }
 
-# Attach the policy to the role
 resource "aws_iam_role_policy_attachment" "rds_monitoring" {
   role       = aws_iam_role.rds_monitoring.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }
 
-# SSM Parameter for DB endpoint
+# SSM Parameters (unchanged)
 resource "aws_ssm_parameter" "db_endpoint" {
   name  = "/${var.project_name}/db/endpoint"
   type  = "String"
@@ -92,7 +107,6 @@ resource "aws_ssm_parameter" "db_endpoint" {
   }
 }
 
-# SSM Parameter for DB name
 resource "aws_ssm_parameter" "db_name" {
   name  = "/${var.project_name}/db/name"
   type  = "String"
@@ -103,4 +117,3 @@ resource "aws_ssm_parameter" "db_name" {
     Environment = var.environment
   }
 }
- */

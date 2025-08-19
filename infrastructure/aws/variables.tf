@@ -90,3 +90,9 @@ variable "allowed_cidr_blocks" {
   type        = list(string)
   default     = ["0.0.0.0/0"]
 }
+
+variable "populate_db" {
+  description = "Flag to populate database on first run"
+  type        = bool
+  default     = true
+}
