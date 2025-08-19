@@ -1,4 +1,4 @@
-const apiServerUrl = 'http://13.37.105.7:5000';
+const apiServerUrl = 'http://eco-webapp-alb-291499938.eu-central-1.elb.amazonaws.com';
 let currentPage = 1;
 const postsPerPage = 5;
 
@@ -10,7 +10,7 @@ const pageInfo = document.getElementById('page-info');
 function loadPosts() {
     const offset = (currentPage - 1) * postsPerPage;
     
-    axios.get(`${apiServerUrl}/api/posts?limit=${postsPerPage}&offset=${offset}`)
+    axios.get(`${apiServerUrl}/posts?limit=${postsPerPage}&offset=${offset}`)
         .then(response => {
             const posts = response.data;
             postsContainer.innerHTML = '';

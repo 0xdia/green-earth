@@ -1,4 +1,4 @@
-const apiServerUrl = 'http://13.37.105.7:5000';
+const apiServerUrl = 'http://eco-webapp-alb-291499938.eu-central-1.elb.amazonaws.com';
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('post-form').addEventListener('submit', e => {
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
             content: document.getElementById('content').value
         };
         
-        axios.post(`${apiServerUrl}/api/post`, postData)
+        axios.post(`${apiServerUrl}/post`, postData)
             .then(response => {
                 document.getElementById('post-status').innerHTML = 
                     '<div class="alert alert-success">Post created successfully! Redirecting...</div>';

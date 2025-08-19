@@ -1,5 +1,5 @@
 // @TODO: API URL
-const apiServerUrl = 'http://13.37.105.7:5000';
+const apiServerUrl = 'http://eco-webapp-alb-291499938.eu-central-1.elb.amazonaws.com';
 
 // Get post ID from URL for single post pages
 function getPostId() {
@@ -38,7 +38,7 @@ function postComment() {
             date: date
         });
         
-        axios.post(apiServerUrl + "/api/comment", json, {
+        axios.post(apiServerUrl + "/comment", json, {
             headers: { 'Content-Type': 'application/json' }
         })
         .then(() => {
@@ -59,7 +59,7 @@ function getComments() {
     const postId = getPostId();
     if (!postId) return;
 
-    axios.get(apiServerUrl + "/api/comments/" + postId)
+    axios.get(apiServerUrl + "/comments/" + postId)
         .then(response => {
             const commentsContainer = document.getElementById("get-comments");
             if (!commentsContainer) return;
