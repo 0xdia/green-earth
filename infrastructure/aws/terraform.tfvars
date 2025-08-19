@@ -19,8 +19,8 @@ desired_capacity = 1
 # Database Configuration
 db_instance_class = "db.t3.micro"
 db_name           = "ecowebapp"
-db_username       = "admin"
-db_password       = "YourSecurePassword123!" # Change this!
+db_username       = "ecoadmin"
+db_password       = "YourSecurePassword123!"
 
 # Security Configuration
 allowed_cidr_blocks = ["0.0.0.0/0"] # Restrict this for production!

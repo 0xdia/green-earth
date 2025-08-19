@@ -1,11 +1,36 @@
 #!/bin/bash
 
+# Set AWS region
+AWS_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
+export AWS_REGION
+
 yum update -y
 yum install -y git nginx python3 python3-pip
 pip3 install virtualenv
 
 git clone https://github.com/0xdia/green-earth.git /home/ec2-user/green-earth
 chown -R ec2-user:ec2-user /home/ec2-user/green-earth
+
+# Get database credentials from SSM
+PROJECT_NAME="${project_name}"
+DB_ENDPOINT=$(aws ssm get-parameter --name "/$${PROJECT_NAME}/db/endpoint" --region $${AWS_REGION} --query Parameter.Value --output text)
+DB_NAME=$(aws ssm get-parameter --name "/$${PROJECT_NAME}/db/name" --region $${AWS_REGION} --query Parameter.Value --output text)
+DB_USERNAME=$(aws ssm get-parameter --name "/$${PROJECT_NAME}/db/username" --region $${AWS_REGION} --query Parameter.Value --output text)
+DB_PASSWORD=$(aws ssm get-parameter --name "/$${PROJECT_NAME}/db/password" --region $${AWS_REGION} --with-decryption --query Parameter.Value --output text)
+
+POPULATE_DB=true
+export POPULATE_DB
+
+# Create environment file
+cat << EOF > /home/ec2-user/green-earth/backend/.env
+POSTGRES_HOST=$${DB_ENDPOINT}
+POSTGRES_DATABASE=$${DB_NAME}
+POSTGRES_USER=$${DB_USERNAME}
+POSTGRES_PASSWORD=$${DB_PASSWORD}
+AWS_REGION=$${AWS_REGION}
+EOF
+
+chown ec2-user:ec2-user /home/ec2-user/green-earth/backend/.env
 
 cd /home/ec2-user/green-earth/backend
 python3 -m virtualenv venv
@@ -21,7 +46,7 @@ After=network.target
 User=ec2-user
 Group=ec2-user
 WorkingDirectory=/home/ec2-user/green-earth/backend
-Environment="PATH=/home/ec2-user/green-earth/backend/venv/bin"
+EnvironmentFile=/home/ec2-user/green-earth/backend/.env
 ExecStart=/home/ec2-user/green-earth/backend/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:5000 handler:app
 Restart=always
 
@@ -35,32 +60,3 @@ chown -R ec2-user:ec2-user /home/ec2-user/green-earth
 systemctl daemon-reload
 systemctl start flaskapp
 systemctl enable flaskapp
-
-sudo rm -rf /usr/share/nginx/html/*
-sudo cp -r /home/ec2-user/green-earth/frontend/* /usr/share/nginx/html/
-
-sudo tee /etc/nginx/conf.d/frontend.conf << 'EOF'
-server {
-    listen 80;
-
-    root /usr/share/nginx/html;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    # Proxy all backend routes
-    location ~ ^/(posts|post|comments|comment|health) {
-        proxy_pass http://0.0.0.0:5000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-}
-EOF
-
-sudo chown -R nginx:nginx /usr/share/nginx/html
-sudo chmod -R 755 /usr/share/nginx/html
-
-sudo systemctl restart nginx

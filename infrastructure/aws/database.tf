@@ -11,9 +11,8 @@ resource "aws_db_subnet_group" "main" {
 resource "aws_db_instance" "main" {
   identifier = "${var.project_name}-db"
 
-  # Changed to PostgreSQL
   engine         = "postgres"
-  engine_version = "15.4"
+  engine_version = "17.4"
   instance_class = var.db_instance_class
 
   allocated_storage     = 20
@@ -32,13 +31,13 @@ resource "aws_db_instance" "main" {
   backup_window           = "03:00-04:00"
   maintenance_window      = "Sun:04:00-Sun:05:00"
 
-  multi_az               = true
-  skip_final_snapshot    = false
+  multi_az            = true
+  skip_final_snapshot = false
   # Removed timestamp to prevent recreation
   final_snapshot_identifier = "${var.project_name}-db-final-snapshot"
 
-  monitoring_interval = 60
-  monitoring_role_arn = aws_iam_role.rds_monitoring.arn
+  monitoring_interval          = 60
+  monitoring_role_arn          = aws_iam_role.rds_monitoring.arn
   performance_insights_enabled = false
 
   # Optional: Enable PostgreSQL logs
@@ -54,8 +53,8 @@ resource "aws_db_instance" "main" {
 }
 
 resource "aws_db_parameter_group" "postgres" {
-  name   = "${var.project_name}-postgres15"
-  family = "postgres15"
+  name   = "${var.project_name}-postgres17"
+  family = "postgres17"
 
   parameter {
     name  = "log_statement"
@@ -114,6 +113,39 @@ resource "aws_ssm_parameter" "db_name" {
 
   tags = {
     Name        = "${var.project_name}-db-name"
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "db_username" {
+  name  = "/${var.project_name}/db/username"
+  type  = "String"
+  value = var.db_username
+
+  tags = {
+    Name        = "${var.project_name}-db-username"
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "db_password" {
+  name  = "/${var.project_name}/db/password"
+  type  = "SecureString"
+  value = var.db_password
+
+  tags = {
+    Name        = "${var.project_name}-db-password"
+    Environment = var.environment
+  }
+}
+
+resource "aws_ssm_parameter" "db_instance" {
+  name  = "/${var.project_name}/db/instance"
+  type  = "String"
+  value = "${var.project_name}-db"
+
+  tags = {
+    Name        = "${var.project_name}-db-instance"
     Environment = var.environment
   }
 }

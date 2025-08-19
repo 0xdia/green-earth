@@ -26,7 +26,7 @@ resource "aws_security_group" "web" {
   name_prefix = "${var.project_name}-web"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
+  ingress { # TODO: delete this rule
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -105,7 +105,7 @@ resource "aws_iam_role" "ec2_role" {
   }
 }
 
-# IAM Policy for CloudWatch and SSM
+# IAM Policy for CloudWatch and SSM and RDS
 resource "aws_iam_role_policy" "ec2_policy" {
   name = "${var.project_name}-ec2-policy"
   role = aws_iam_role.ec2_role.id
@@ -121,18 +121,19 @@ resource "aws_iam_role_policy" "ec2_policy" {
           "ec2:DescribeTags",
           "logs:PutLogEvents",
           "logs:CreateLogGroup",
-          "logs:CreateLogStream"
+          "logs:CreateLogStream",
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath"
         ]
         Resource = "*"
       },
       {
         Effect = "Allow"
         Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters",
-          "ssm:GetParametersByPath"
+          "rds:DescribeDBInstances"
         ]
-        Resource = "arn:aws:ssm:*:*:parameter/${var.project_name}/*"
+        Resource = "arn:aws:rds:*:*:db:${var.project_name}-db"
       }
     ]
   })

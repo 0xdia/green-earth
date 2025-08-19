@@ -44,7 +44,7 @@ resource "aws_lb" "main" {
 resource "aws_lb_target_group" "web" {
   name     = "${var.project_name}-tg"
   vpc_id   = aws_vpc.main.id
-  port     = 80
+  port     = 5000
   protocol = "HTTP"
 
   health_check {

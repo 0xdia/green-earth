@@ -3,10 +3,9 @@ output "application_url" {
   value       = "http://${aws_lb.main.dns_name}"
 }
 
-/* output "rds_endpoint" {
+output "rds_endpoint" {
   description = "RDS instance endpoint"
   value       = aws_db_instance.main.endpoint
-  sensitive   = true
 }
 
 output "postgres_username" {
@@ -14,4 +13,4 @@ output "postgres_username" {
   value       = aws_db_instance.main.username
   sensitive   = true
 }
- */
+
