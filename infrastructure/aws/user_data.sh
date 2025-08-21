@@ -1,8 +1,5 @@
 #!/bin/bash
 
-AWS_REGION="${aws_region}"
-export AWS_REGION
-
 yum update -y
 yum install -y git nginx python3 python3-pip
 pip3 install virtualenv
@@ -10,26 +7,14 @@ pip3 install virtualenv
 git clone https://github.com/0xdia/green-earth.git /home/ec2-user/green-earth
 chown -R ec2-user:ec2-user /home/ec2-user/green-earth
 
-# Get database credentials from passed parameters
-PROJECT_NAME="${project_name}"
-DB_ENDPOINT="${db_endpoint}"
-DB_NAME="${db_name}"
-DB_USERNAME="${db_username}"
-DB_PASSWORD="${db_password}"
 
-POPULATE_DB=true
-export POPULATE_DB
+export POSTGRES_HOST=${db_endpoint}
+export POSTGRES_DATABASE=${db_name}
+export POSTGRES_USER=${db_username}
+export POSTGRES_PASSWORD=${db_password}
+export AWS_REGION=${aws_region}
+export POPULATE_DB=true
 
-# Create environment file
-cat << EOF > /home/ec2-user/green-earth/backend/.env
-POSTGRES_HOST=$${DB_ENDPOINT}
-POSTGRES_DATABASE=$${DB_NAME}
-POSTGRES_USER=$${DB_USERNAME}
-POSTGRES_PASSWORD=$${DB_PASSWORD}
-AWS_REGION=$${AWS_REGION}
-EOF
-
-chown ec2-user:ec2-user /home/ec2-user/green-earth/backend/.env
 
 cd /home/ec2-user/green-earth/backend
 python3 -m virtualenv venv
