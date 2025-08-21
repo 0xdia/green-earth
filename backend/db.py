@@ -4,15 +4,22 @@ from psycopg2.extras import RealDictCursor
 import boto3
 
 def get_postgres_host():
-    return os.environ["POSTGRES_HOST"]
-
+    host_with_port = os.environ["POSTGRES_HOST"]
+    if ":" in host_with_port:
+        host, port = host_with_port.split(":")
+        return host, int(port)
+    else:
+        return host_with_port, 5432
+    
 class DBHandler:
     __connection = None
 
     def set_connection(self):
         if not self.__connection:
+            postgres_host, postgres_port = get_postgres_host()
             self.__connection = psycopg2.connect(
-                host=os.environ["POSTGRES_HOST"],
+                host=postgres_host,
+                port=postgres_port,
                 database=os.environ["POSTGRES_DATABASE"],
                 user=os.environ["POSTGRES_USER"],
                 password=os.environ["POSTGRES_PASSWORD"]
