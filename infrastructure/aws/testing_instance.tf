@@ -4,11 +4,16 @@ resource "aws_instance" "test_instance" {
   instance_type          = var.instance_type
   key_name               = "eco-webapp-key"
   vpc_security_group_ids = [aws_security_group.web.id]
-  subnet_id              = aws_subnet.private[0].id # Use first private subnet
+  subnet_id              = aws_subnet.private[0].id
   iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   user_data_base64 = base64encode(templatefile("${path.module}/user_data.sh", {
+    aws_region   = var.aws_region,
     project_name = var.project_name
+    db_endpoint  = aws_db_instance.main.endpoint
+    db_name      = var.db_name
+    db_username  = var.db_username
+    db_password  = var.db_password
   }))
 
   tags = {
@@ -17,14 +22,7 @@ resource "aws_instance" "test_instance" {
     Purpose     = "Testing"
   }
 
-  # Ensure we have all dependencies created first
-  depends_on = [
-    aws_db_instance.main,
-    aws_ssm_parameter.db_endpoint,
-    aws_ssm_parameter.db_name,
-    aws_ssm_parameter.db_username,
-    aws_ssm_parameter.db_password
-  ]
+  depends_on = [aws_db_instance.main]
 }
 
 # Elastic IP for the test instance (optional, for direct access)
@@ -52,9 +50,4 @@ output "test_instance_private_ip" {
 output "test_instance_ssh_command" {
   description = "SSH command to connect to the test instance"
   value       = "ssh -i eco-webapp-key.pem ec2-user@${aws_eip.test_instance.public_ip}"
-}
-
-output "test_instance_ssm_command" {
-  description = "AWS SSM command to connect to the test instance"
-  value       = "aws ssm start-session --target ${aws_instance.test_instance.id}"
 }

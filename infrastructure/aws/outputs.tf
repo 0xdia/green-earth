@@ -13,4 +13,3 @@ output "postgres_username" {
   value       = aws_db_instance.main.username
   sensitive   = true
 }
-

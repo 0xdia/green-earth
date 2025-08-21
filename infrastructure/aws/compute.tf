@@ -10,7 +10,12 @@ resource "aws_launch_template" "web" {
   }
 
   user_data = base64encode(templatefile("${path.module}/user_data.sh", {
-    project_name = var.project_name
+    aws_region   = var.aws_region,
+    project_name = var.project_name,
+    db_endpoint  = aws_db_instance.main.endpoint,
+    db_name      = var.db_name,
+    db_username  = var.db_username,
+    db_password  = var.db_password
   }))
 
   tag_specifications {

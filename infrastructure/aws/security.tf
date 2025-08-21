@@ -105,7 +105,7 @@ resource "aws_iam_role" "ec2_role" {
   }
 }
 
-# IAM Policy for CloudWatch and SSM and RDS
+# IAM Policy for CloudWatch and RDS
 resource "aws_iam_role_policy" "ec2_policy" {
   name = "${var.project_name}-ec2-policy"
   role = aws_iam_role.ec2_role.id
@@ -121,19 +121,9 @@ resource "aws_iam_role_policy" "ec2_policy" {
           "ec2:DescribeTags",
           "logs:PutLogEvents",
           "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "ssm:GetParameter",
-          "ssm:GetParameters",
-          "ssm:GetParametersByPath"
+          "logs:CreateLogStream"
         ]
         Resource = "*"
-      },
-      {
-        Effect = "Allow"
-        Action = [
-          "rds:DescribeDBInstances"
-        ]
-        Resource = "arn:aws:rds:*:*:db:${var.project_name}-db"
       }
     ]
   })

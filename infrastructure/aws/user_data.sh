@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Set AWS region
-AWS_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)
+AWS_REGION="${aws_region}"
 export AWS_REGION
 
 yum update -y
@@ -11,12 +10,12 @@ pip3 install virtualenv
 git clone https://github.com/0xdia/green-earth.git /home/ec2-user/green-earth
 chown -R ec2-user:ec2-user /home/ec2-user/green-earth
 
-# Get database credentials from SSM
+# Get database credentials from passed parameters
 PROJECT_NAME="${project_name}"
-DB_ENDPOINT=$(aws ssm get-parameter --name "/$${PROJECT_NAME}/db/endpoint" --region $${AWS_REGION} --query Parameter.Value --output text)
-DB_NAME=$(aws ssm get-parameter --name "/$${PROJECT_NAME}/db/name" --region $${AWS_REGION} --query Parameter.Value --output text)
-DB_USERNAME=$(aws ssm get-parameter --name "/$${PROJECT_NAME}/db/username" --region $${AWS_REGION} --query Parameter.Value --output text)
-DB_PASSWORD=$(aws ssm get-parameter --name "/$${PROJECT_NAME}/db/password" --region $${AWS_REGION} --with-decryption --query Parameter.Value --output text)
+DB_ENDPOINT="${db_endpoint}"
+DB_NAME="${db_name}"
+DB_USERNAME="${db_username}"
+DB_PASSWORD="${db_password}"
 
 POPULATE_DB=true
 export POPULATE_DB
