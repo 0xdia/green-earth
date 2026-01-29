@@ -1,0 +1,5 @@
+Enable psql on Amazon Linux:
+
+sudo amazon-linux-extras | grep postgresql
+sudo amazon-linux-extras enable postgresql14
+sudo yum install -y postgresql
