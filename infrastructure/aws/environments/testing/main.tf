@@ -22,20 +22,22 @@ module "security" {
 module "database" {
   source = "../../modules/database"
 
-  project_name            = var.project_name
-  environment             = var.environment
-  vpc_id                  = module.networking.vpc_id
-  private_subnet_ids      = module.networking.private_subnet_ids
-  db_security_group_id    = module.security.rds_sg_id
-  db_name                 = var.db_name
-  db_username             = var.db_username
-  db_password             = var.db_password
-  db_instance_class       = var.db_instance_class
-  allocated_storage       = var.allocated_storage
-  multi_az                = false # to save cost
-  backup_retention_period = var.backup_retention_period
-  monitoring_role_arn     = var.monitoring_role_arn
-  tags                    = var.tags
+  project_name                = var.project_name
+  environment                 = var.environment
+  vpc_id                      = module.networking.vpc_id
+  private_subnet_ids          = module.networking.private_subnet_ids
+  db_security_group_id        = module.security.rds_sg_id
+  db_name                     = var.db_name
+  db_username                 = var.db_username
+  db_password                 = var.db_password
+  db_instance_class           = var.db_instance_class
+  allocated_storage           = var.allocated_storage
+  multi_az                    = var.multi_az_enabled
+  backup_retention_period     = var.backup_retention_period
+  monitoring_role_arn         = var.monitoring_role_arn
+  tags                        = var.tags
+  create_read_replica         = true
+  read_replica_instance_class = var.read_replica_instance_class
 }
 
 module "compute" {
@@ -73,3 +75,11 @@ module "monitoring" {
   sns_topic_arn  = var.sns_topic_arn
   tags           = var.tags
 }
+
+# outputs
+output "alb_dns_name" { value = module.compute.alb_dns_name }
+output "db_endpoint" { value = module.database.db_endpoint }
+output "db_port" { value = module.database.db_port }
+output "read_replica_endpoint" { value = module.database.read_replica_endpoint }
+output "vpc_id" { value = module.networking.vpc_id }
+output "asg_name" { value = module.compute.asg_name }

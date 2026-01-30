@@ -42,3 +42,15 @@ variable "tags" {
     ManagedBy   = "Terraform"
   }
 }
+variable "multi_az_enabled" {
+  type    = bool
+  default = false
+}
+variable "create_read_replica" {
+  type    = bool
+  default = false
+}
+variable "read_replica_instance_class" {
+  type    = string
+  default = ""
+}
